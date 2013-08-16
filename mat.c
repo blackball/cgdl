@@ -10,8 +10,8 @@
 
 struct mat*
 mat_new(int r, int c) {
-        struct mat *m = (struct mat *)malloc(sizeof(*m));
-        m->data = (double *)malloc(sizeof(double) * r * c);
+        struct mat *m = malloc(sizeof(*m));
+        m->data = malloc(sizeof(double) * r * c);
         m->rows = r;
         m->cols = c;
         return m;
@@ -29,9 +29,9 @@ mat_free(struct mat **m) {
 double
 mat_sum_col(const struct mat *m, int col) {
         double sum = .0;
-
-        for (int i = 0; i < w->rows; ++i) {
-                sum += m->data[i * w->cols + col];
+        int i = 0;
+        for (; i < m->rows; ++i) {
+                sum += m->data[i * m->cols + col];
         }
 
         return sum;
@@ -40,9 +40,9 @@ mat_sum_col(const struct mat *m, int col) {
 double
 mat_sum_row(const struct mat *m, int row) {
         double sum = .0;
-        
-        for (int i = 0; i < w->cols; ++i) {
-                sum += w->daat[ row * w->cols + i];
+        int i = 0;
+        for (; i < m->cols; ++i) {
+                sum += m->data[ row * m->cols + i];
         }
         
         return sum;
@@ -64,7 +64,7 @@ mat_load(const char *nn) {
                 goto _DOOR;
         }
 
-        if (2 != fscanf(fn, "%d%d", &rows, cols)) {
+        if (2 != fscanf(fn, "%d%d", &rows, &cols)) {
                 goto _DOOR;
         }
 
@@ -79,7 +79,7 @@ mat_load(const char *nn) {
         }
         
         counter = 0;
-        while (1 == fscanf(fn, "%lf", m->data[counter]) && (counter < cols * rows)) {
+        while (1 == fscanf(fn, "%lf", m->data + counter) && (counter < cols * rows)) {
                 ++ counter;
         }
 
