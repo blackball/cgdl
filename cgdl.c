@@ -333,15 +333,12 @@ wmat_free(struct wmat **wm) {
 
 static void
 wmat_square(struct wmat *wm) {
-        const int cols = wm->cols;
-        const int rows = wm->rows;
+        const int sz = wm->cols * wm->rows;
         double *w = wm->w;
-        int i, j;
         
-        for (i = 0; i < rows; ++i) {
-                for (j = 0; j < cols; ++j) {
-                        w[i * cols + j] *= w[i * cols + j];
-                }
+        int i = 0;
+        for (; i < sz; ++i) {
+                w[i] *= w[i];
         }
 }
 
