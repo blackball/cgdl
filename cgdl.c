@@ -89,7 +89,7 @@
 struct idict {
         int size, alloc;
         int vnum; /* valid, non-null vectors, because we have a merge keep method ... */
-        /* pvec[i] is a int array, and the pvec[i][0] is the key, pvec is the size of it. */
+        /*  treat pvec[i] as a IVEC */
         int **pvec;
 };
  
