@@ -162,6 +162,10 @@ idict_new(int sz) {
 static void
 idict_free(struct idict **dict) {
         if (dict && (*dict)) {
+                int i = 0;
+                for (; i < (*dict)->size; ++i) {
+                        IVEC_FREE((*dict)->pvec[i]);
+                }
                 free( (*dict)->pvec );
                 free( *dict );
                 *dict = NULL;
