@@ -1,0 +1,6 @@
+CGDL
+===
+
+A C implementation of Graph Degree Linkage: Agglomerative Clustering on a Directed Graph, Wei Zhang. ECCV 2012.
+
+Status: almost finished.
