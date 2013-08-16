@@ -23,10 +23,10 @@
 #define IVEC_KEY(v)     ((v)[IVEC_HEADER_KEY_I])
 #define IVEC_SIZE(v)    ((v)[IVEC_HEADER_SIZE_I])
 #define IVEC_ALLOC(v)   ((v)[IVEC_HEADER_ALLOC_I])
-#define IVEC_DATAPTR(v) ((v) + IVEC_HEADER_SIZE)
+#define IVEC_DATAPTR(v) ((v) + IVEC_HEADER_SIZE))
 #define IVEC_AT(v, i)   ((v)[IVEC_HEADER_SIZE + (i)])
 #define IVEC_CLEAR(v)   ((v)[IVEC_HEADER_SIZE_I] = 0)
- 
+
 #define IVEC_NEW(v, sz)                                                 \
         do {                                                            \
                 const int s = (sz) > IVEC_DEFAULT_SIZE ? (sz) : IVEC_DEFAULT_SIZE; \
