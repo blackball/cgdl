@@ -9,15 +9,15 @@
 #include <stdio.h>
 
 static void
-demo(void) {        
+demo(void) {
         /* target cluster number */
-        const int T = 10; 
+        const int T = 10;
         int ret = 0;
 
         int *labels = NULL;
         struct mat *m = mat_load("");
 
-                
+
         if (m == NULL) {
                 /* load distance mat failed! */
                 return ;
@@ -36,29 +36,29 @@ demo(void) {
                 goto _DOOR;
         }
 
-        while ( cgdl_num(cgdl) > T ) {
-                double aff = cgdl_merge(cgdl);
+        while ( cgdl_num(gdl) > T ) {
+                double aff = cgdl_merge(gdl);
                 printf("The affinity of merged clusters is: %lf\n", aff);
         }
 
         labels = malloc(sizeof(labels[0]) * m->cols);
 
         if (labels == NULL) {
-                goto _DDOR;
+                goto _DOOR;
         }
-        
+
         /* get the class labels */
-        cgdl_labels(cgdl, labels);
+        cgdl_labels(gdl, labels);
 
         /* The you get the labels, do whatever you what next  */
-        
+
  _DOOR:
         if (m) {
                 mat_free(&m);
         }
 
-        if (cgdl) {
-                cgdl_free(&cgdl);
+        if (gdl) {
+                cgdl_free(&gdl);
         }
 
         if (labels) {
@@ -68,7 +68,7 @@ demo(void) {
 
 int
 main(int argc, char *argv[]) {
-        demo();        
+        demo();
         return 0;
 }
 
