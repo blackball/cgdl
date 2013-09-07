@@ -44,7 +44,7 @@ mat_sum_row(const struct mat *m, int row) {
         for (; i < m->cols; ++i) {
                 sum += m->data[ row * m->cols + i];
         }
-        
+
         return sum;
 }
 
@@ -53,7 +53,7 @@ mat_load(const char *nn) {
         FILE *fn = NULL;
         struct mat *m = NULL;
         int rows = 0, cols = 0, counter;
-        
+
         if (nn == NULL) {
                 goto _DOOR;
         }
@@ -77,7 +77,7 @@ mat_load(const char *nn) {
         if (m == NULL) {
                 goto _DOOR;
         }
-        
+
         counter = 0;
         while (1 == fscanf(fn, "%lf", m->data + counter) && (counter < cols * rows)) {
                 ++ counter;
@@ -94,4 +94,20 @@ mat_load(const char *nn) {
         }
 
         return m;
+}
+
+void
+mat_print(const struct mat *m) {
+        int i, j;
+        if (!m) {
+                return ;
+        }
+
+        for (i = 0; i < m->rows; ++i) {
+                for (j = 0; j < m->cols; ++j) {
+                        printf("%lf ", MAT_AT(m, i, j));
+                }
+                printf("\n");
+        }
+
 }

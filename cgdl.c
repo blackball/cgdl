@@ -8,6 +8,7 @@
 #include "mat.h"
 #include "cgdl.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -314,6 +315,24 @@ struct wmat {
         double *w;
 };
 
+static void
+wmat_print(const struct wmat *wm) {
+        int i, j;
+        if (wm == NULL) {
+                printf("wmat is NULL!\n");
+                return ;
+        }
+
+        for (i = 0; i < wm->rows; ++i) {
+                printf("%d -> ", i);
+                for (j = 0; j < wm->cols; ++j) {
+                        printf("(%d, %lf), ", wm->i[i * wm->cols + j], wm->w[i * wm->cols + j]);
+                }
+                printf("\n");
+        }
+        return ;
+}
+
 static struct wmat*
 wmat_new(int r, int c) {
         struct wmat *wm = malloc(sizeof(*wm));
@@ -403,10 +422,10 @@ wmat_normalize(struct wmat *wm, int k, double a) {
 
         sum = wmat_sum(wm);
 
-        sigma2_inv = (double)(wm->rows * k) / (a * sum);
+        sigma2_inv = (double)(wm->rows * k) / (a * sum) * (-1.0);
 
         for (i = 0; i < wm->rows * wm->cols; ++i) {
-                wm->w[i] = -exp( wm->w[i] ) * sigma2_inv;
+                wm->w[i] = exp( wm->w[i] * sigma2_inv );
         }
         return 0;
 }
@@ -435,7 +454,7 @@ static int
 wmat_link(const struct wmat *wm, int k, int *labels) {
         int i, j, label_gen = 0;
         int *label_set = NULL;
-        const int N = wm->cols;
+        const int N = wm->rows;
 
         if (wm == NULL || wm->cols < k || labels == NULL) {
                 return -1;
@@ -568,7 +587,7 @@ struct fastpair {
 /* cluster affinity */
 static inline double
 fastpair_distance(const struct fastpair *fp, int ia, int ib) {
-        double dist = .0, ab = .0, ba = .0;
+        double ab = .0, ba = .0;
 
         struct mat *mab = NULL, *mba = NULL;
         const int *pa = NULL, *pb = NULL;
@@ -602,7 +621,7 @@ fastpair_distance(const struct fastpair *fp, int ia, int ib) {
 
         /* because bigger affinity means closer, so, need to inverse it for fastpair */
 
-        return 1.0 / (dist + DBL_EPSILON);
+        return 1.0 / (ab + ba + DBL_EPSILON);
 }
 
 static void
@@ -818,15 +837,16 @@ _cgdl_heaptify(int *indices, double *values, int k) {
                 }
         }
 
+#define _SWAP(arr, ia, ib, t) t = arr[ia]; arr[ia] = arr[ib]; arr[ib] = t
+
         /* swap 0<->maxi */
-        indices[maxi] = indices[0];
-        indices[0] = maxi;
-        values[maxi] = values[0];
-        values[0] = maxv;
+        _SWAP(indices, 0, maxi, i);
+        _SWAP(values, 0, maxi, maxv);
 }
 
+/* exclude itself */
 static inline void
-_cgdl_smallest_k(const double *data, int sz, int *indices, double *values, int k) {
+_cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *values, int k) {
         int i = 0;
 
         for (; i < k; ++i) {
@@ -834,13 +854,33 @@ _cgdl_smallest_k(const double *data, int sz, int *indices, double *values, int k
                 values[i] = data[i];
         }
 
-        _cgdl_heaptify(indices, values, k);
+        if (exclude < k) {
+                indices[exclude] = k;
+                values[exclude] = data[k];
 
-        for (i = k; i < sz; ++i) {
-                if (data[i] < values[0]) {
-                        values[0] = data[i];
-                        _cgdl_heaptify(indices, values, k);
+                _cgdl_heaptify(indices, values, k);
+
+                for (i = k+1; i < sz; ++i) {
+                        if ( data[i] < values[0]) {
+                                values[0] = data[i];
+                                indices[0] = i;
+                                _cgdl_heaptify(indices, values, k);
+                        }
                 }
+        }
+        else {
+                for (i = k; i < sz; ++i) {
+                        if (i == exclude) {
+                                continue;
+                        }
+
+                        if ( data[i] < values[0]) {
+                                values[0] = data[i];
+                                indices[0] = i;
+                                _cgdl_heaptify(indices, values, k);
+                        }
+                }
+
         }
 }
 
@@ -863,7 +903,7 @@ _cgdl_knn(const struct mat *dm, int k) {
         }
 
         for (i = 0; i < dm->rows; ++i) {
-                _cgdl_smallest_k(dm->data + i*dm->cols, dm->cols, wm->i + i*k, wm->w + i*k, k);
+                _cgdl_smallest_k(i, dm->data + i*dm->cols, dm->cols, wm->i + i*k, wm->w + i*k, k);
         }
 
         return wm;
@@ -910,13 +950,18 @@ _cgdl_link(const struct wmat *wm, int k) {
 }
 
 struct cgdl*
-cgdl_new(void) {
+cgdl_new(int kw, int kl) {
         struct cgdl *gdl = malloc(sizeof(*gdl));
 
         if (gdl != NULL) {
                 /* default values for GDL */
-                gdl->kw = 20;
-                gdl->kl = 4;
+                /*
+                  gdl->kw = 4;
+                  gdl->kl = 2;
+                  gdl->a  = 1.0;
+                */
+                gdl->kw = kw;
+                gdl->kl = kl;
                 gdl->a  = 1.0;
 
                 gdl->wm = NULL;
@@ -1032,6 +1077,7 @@ cgdl_merge(struct cgdl *gdl) {
         fastpair_delete(gdl->fp, b);
         fastpair_update(gdl->fp, a);
 
+        /* affinity is inverse of distance */
         return aff;
 }
 

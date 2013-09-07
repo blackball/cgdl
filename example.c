@@ -11,19 +11,20 @@
 static void
 demo(void) {
         /* target cluster number */
-        const int T = 10;
+        const int T = 5;
         int ret = 0;
 
         int *labels = NULL;
-        struct mat *m = mat_load("");
+        struct cgdl *gdl = NULL;
 
+        struct mat *m = mat_load("dm.txt");
 
         if (m == NULL) {
                 /* load distance mat failed! */
                 return ;
         }
 
-        struct cgdl *gdl = cgdl_new();
+        gdl = cgdl_new(4, 1);
 
         if (gdl == NULL) {
                 return ;
@@ -50,7 +51,7 @@ demo(void) {
         /* get the class labels */
         cgdl_labels(gdl, labels);
 
-        /* The you get the labels, do whatever you what next  */
+        /* Then you get the labels, do whatever you what next  */
 
  _DOOR:
         if (m) {
