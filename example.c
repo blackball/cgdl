@@ -9,15 +9,24 @@
 #include <stdio.h>
 
 static void
+_print_labels(const int *labels, int n) {
+        int i = 0;
+        for (; i < n; ++i) {
+                printf("%d ", labels[i]);
+        }
+        printf("\n");
+}
+
+static void
 demo(void) {
         /* target cluster number */
-        const int T = 5;
+        const int T = 4;
         int ret = 0;
 
         int *labels = NULL;
         struct cgdl *gdl = NULL;
 
-        struct mat *m = mat_load("dm.txt");
+        struct mat *m = mat_load("dm-1.txt");
 
         if (m == NULL) {
                 /* load distance mat failed! */
@@ -52,6 +61,7 @@ demo(void) {
         cgdl_labels(gdl, labels);
 
         /* Then you get the labels, do whatever you what next  */
+        _print_labels(labels, m->cols);
 
  _DOOR:
         if (m) {

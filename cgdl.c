@@ -599,7 +599,6 @@ fastpair_distance(const struct fastpair *fp, int ia, int ib) {
         if (pa == NULL || pb == NULL) {
                 return MAX_DISTANCE;
         }
-
         mab = wmat_getm(fp->wm, IVEC_DATAPTR(pa), IVEC_SIZE(pa), IVEC_DATAPTR(pb), IVEC_SIZE(pb));
         mba = wmat_getm(fp->wm, IVEC_DATAPTR(pb), IVEC_SIZE(pb), IVEC_DATAPTR(pa), IVEC_SIZE(pa));
 
@@ -844,6 +843,15 @@ _cgdl_heaptify(int *indices, double *values, int k) {
         _SWAP(values, 0, maxi, maxv);
 }
 
+static void
+_iv_print(const int *indices, const double *values, int k) {
+        int i;
+        for (i = 0; i < k; ++i) {
+                printf("(%d, %lf)", indices[i], values[i]);
+        }
+        printf("\n");
+}
+
 /* exclude itself */
 static inline void
 _cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *values, int k) {
@@ -1078,7 +1086,7 @@ cgdl_merge(struct cgdl *gdl) {
         fastpair_update(gdl->fp, a);
 
         /* affinity is inverse of distance */
-        return aff;
+        return 1.0 / (aff + DBL_EPSILON);
 }
 
 int
