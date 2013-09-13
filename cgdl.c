@@ -16,11 +16,11 @@
 
 #ifndef INLINE
 #  if defined __cplusplus
-#    define INLINE inline
+#      define INLINE inline
 #  elif defined _MSC_VER
-#    define INLINE __inline
+#      define INLINE __inline
 #  else
-#    define INLINE static
+#      define INLINE
 #  endif
 #endif
 
@@ -89,51 +89,51 @@
 
 /* merge v1 to v0 */
 #define IVEC_MERGE(v0, v1)                                              \
-        do {                                                            \
-                const int nsz = IVEC_SIZE(v0) + IVEC_SIZE(v1);          \
-                IVEC_RESIZE(v0, nsz);                                   \
-                if (v0 != NULL) {                                       \
-                        memcpy( IVEC_DATAPTR(v0) + IVEC_SIZE(v0), IVEC_DATAPTR(v1), sizeof(Itype) * IVEC_SIZE(v1)); \
-                        IVEC_SIZE(v0) += IVEC_SIZE(v1);                 \
-                }                                                       \
-        } while (0)
+                do {                                                    \
+                        const int nsz = IVEC_SIZE(v0) + IVEC_SIZE(v1);  \
+                        IVEC_RESIZE(v0, nsz);                           \
+                        if (v0 != NULL) {                               \
+                                memcpy( IVEC_DATAPTR(v0) + IVEC_SIZE(v0), IVEC_DATAPTR(v1), sizeof(Itype) * IVEC_SIZE(v1)); \
+                                IVEC_SIZE(v0) += IVEC_SIZE(v1);         \
+                        }                                               \
+                } while (0)
 
 
 /* make ivec could be used as a set */
 
-#define IVEC_FIND(v, val, re)                           \
-        do {                                            \
-                int i = 0;                              \
-                re = -1;                                \
-                for (; i < IVEC_SIZE(v); ++i) {         \
-                        if (IVEC_AT(v, i) == val) {     \
-                                re = i;                 \
-                                break;                  \
+#define IVEC_FIND(v, val, re)                                   \
+                do {                                            \
+                        int i = 0;                              \
+                        re = -1;                                \
+                        for (; i < IVEC_SIZE(v); ++i) {         \
+                                if (IVEC_AT(v, i) == val) {     \
+                                        re = i;                 \
+                                        break;                  \
+                                }                               \
+                        }                                       \
+                } while (0)
+
+
+#define IVEC_INSERT(v, val)                             \
+                do {                                    \
+                        int re = -1;                    \
+                        IVEC_FIND(v, val, re);          \
+                        if (re == -1) {                 \
+                                IVEC_APPEND(v, val);    \
                         }                               \
-                }                                       \
-        } while (0)
+                } while (0)
 
 
-#define IVEC_INSERT(v, val)                     \
-        do {                                    \
-                int re = -1;                    \
-                IVEC_FIND(v, val, re);          \
-                if (re == -1) {                 \
-                        IVEC_APPEND(v, val);    \
-                }                               \
-        } while (0)
-
-
-#define IVEC_MIN(v, re)                                 \
-        do {    /* v's size should be >= 1 */           \
-                int i = 1;                              \
-                re = IVEC_AT(v, 0) ;                    \
-                for (; i < IVEC_SIZE(v); ++i) {         \
-                        if (re > IVEC_AT(v, i)) {       \
-                                re = IVEC_AT(v, i);     \
-                        }                               \
-                }                                       \
-        } while (0)
+#define IVEC_MIN(v, re)                                         \
+                do {    /* v's size should be >= 1 */           \
+                        int i = 1;                              \
+                        re = IVEC_AT(v, 0) ;                    \
+                        for (; i < IVEC_SIZE(v); ++i) {         \
+                                if (re > IVEC_AT(v, i)) {       \
+                                        re = IVEC_AT(v, i);     \
+                                }                               \
+                        }                                       \
+                } while (0)
 
 /** idict structure **/
 

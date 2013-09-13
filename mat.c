@@ -28,14 +28,14 @@ mat_free(struct mat **m) {
 
 void 
 mat_set(struct mat *m, double v) {
-	if (m) {
-			int i,j;
-			for (i = 0; i < m->rows; ++i) {
-					for (j = 0; j < m->cols; ++j) {
-							m->data[i * m->cols + j] = v;
-					}
-			}
-	}
+        if (m) {
+                int i,j;
+                for (i = 0; i < m->rows; ++i) {
+                        for (j = 0; j < m->cols; ++j) {
+                                m->data[i * m->cols + j] = v;
+                        }
+                }
+        }
 }
 
 double
