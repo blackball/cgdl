@@ -14,6 +14,16 @@
 #include <float.h>
 #include <string.h>
 
+#ifndef INLINE
+#  if defined __cplusplus
+#    define INLINE inline
+#  elif defined _MSC_VER
+#    define INLINE __inline
+#  else
+#    define INLINE static
+#  endif
+#endif
+
 /** idict structure **/
 
 #define Itype int
@@ -517,7 +527,7 @@ wmat_link(const struct wmat *wm, int k, int *labels) {
         return 0;
 }
 
-static inline int
+static INLINE int
 _wmat_bsearch(const int *indices, int n, int val) {
         int start = 0, end = n - 1, mid;
 
@@ -536,7 +546,7 @@ _wmat_bsearch(const int *indices, int n, int val) {
         return -1;
 }
 
-static inline double
+static INLINE double
 wmat_get_d(const struct wmat *wm, int r, int c) {
         const int *indices = wm->i + r * wm->cols;
 
@@ -585,7 +595,7 @@ struct fastpair {
 #define MAX_DISTANCE DBL_MAX
 
 /* cluster affinity */
-static inline double
+static INLINE double
 fastpair_distance(const struct fastpair *fp, int ia, int ib) {
         double ab = .0, ba = .0;
 
@@ -699,7 +709,7 @@ fastpair_new(const struct idict *dict, const struct wmat *wm) {
 /**
  * find the NN of a given point
  */
-static inline void
+static INLINE void
 fastpair_findnn(struct fastpair *fp, int p) {
         int i, first_nbr;
 
@@ -730,13 +740,13 @@ fastpair_findnn(struct fastpair *fp, int p) {
         }
 }
 
-static inline void
+static INLINE void
 fastpair_add(struct fastpair *fp, int p) {
         fastpair_findnn(fp, p);
         fp->points[ fp->where[p] = fp->npoints ++ ] = p;
 }
 
-static inline void
+static INLINE void
 fastpair_update(struct fastpair *fp, int p) {
         int i;
         fp->neighbors[p] = p;
@@ -763,7 +773,7 @@ fastpair_update(struct fastpair *fp, int p) {
         }
 }
 
-static inline void
+static INLINE void
 fastpair_delete(struct fastpair *fp, int p) {
         int i, q = fp->where[p];
 
@@ -824,7 +834,7 @@ struct cgdl {
 };
 
 
-static inline void
+static INLINE void
 _cgdl_heaptify(int *indices, double *values, int k) {
         int i, maxi = 0;
         double maxv = values[0];
@@ -853,7 +863,7 @@ _iv_print(const int *indices, const double *values, int k) {
 }
 
 /* exclude itself */
-static inline void
+static INLINE void
 _cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *values, int k) {
         int i = 0;
 

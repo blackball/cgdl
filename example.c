@@ -7,6 +7,7 @@
 #include "mat.h"
 #include "cgdl.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 static void
 _print_labels(const int *labels, int n) {
@@ -80,6 +81,7 @@ demo(void) {
 int
 main(int argc, char *argv[]) {
         demo();
+		getchar();
         return 0;
 }
 

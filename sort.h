@@ -6,7 +6,7 @@
  */
 
 #ifndef CGDL_SORT_H
-#define CGDL_H
+#define CGDL_SORT_H
 
 #include <stdlib.h>
 
