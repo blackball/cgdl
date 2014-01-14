@@ -17,7 +17,7 @@ static struct {
 } s_ptsvec;
 
 static void
-ptsvec_create() {
+ptsvec_init() {
         s_ptsvec.pts = malloc(sizeof(s_ptsvec.pts[0]) * 1000);
         assert(s_ptsvec.pts);
         s_ptsvec.size = 0;
@@ -26,8 +26,9 @@ ptsvec_create() {
 
 static void
 ptsvec_append(CvPoint pt) {
-        if (!s_ptsvec.size < s_ptsvec.alloc) {
+        if (!(s_ptsvec.size < s_ptsvec.alloc)) {
                 s_ptsvec.pts = realloc(s_ptsvec.pts, sizeof(s_ptsvec.pts[0]) * (s_ptsvec.alloc + 1000));
+                s_ptsvec.alloc += 1000;
                 assert(s_ptsvec.pts);
         }
         
@@ -48,7 +49,7 @@ ptsvec_size() {
 
 static double 
 pts_dist(const CvPoint p0, const CvPoint p1) {
-        return sqrt(double((p0.x - p1.x) * (p0.x - p1.x) + (p0.y - p1.y) * (p0.y - p1.y)));
+        return sqrt((double)((p0.x - p1.x) * (p0.x - p1.x) + (p0.y - p1.y) * (p0.y - p1.y)));
 }
 
 static void
@@ -78,7 +79,7 @@ ptsvec_wtf(const char *dmname, const char *pixname) {
         f = fopen(dmname, "w");
         assert(f);
 
-        fprintf("%d %d\n", size, size);
+        fprintf(f, "%d %d\n", size, size);
         for (i = 0; i < size; ++i) {
                 for (j = 0; j < size; ++j) {
                         fprintf(f, "%lf ", dm[i * size +j]);
@@ -87,7 +88,7 @@ ptsvec_wtf(const char *dmname, const char *pixname) {
         }
         
         fclose(f);
-        free(dm)
+        free(dm);
 }
 
 #define is_foreground(p) (p != 0)
@@ -109,7 +110,7 @@ extract_dm(const char *imgname, const char *dmname, const char *pixname) {
         for (i = 0; i < img->height; ++i) {
                 for (j = 0; j < img->width; ++j) {
                         if ( is_foreground(data[i*ws + j]) ) {
-                                ptsvec_append(cvPoint(i, j));
+                                ptsvec_append(cvPoint(j, i));
                         }
                 }
         }
@@ -127,19 +128,28 @@ extract_dm(const char *imgname, const char *dmname, const char *pixname) {
 #define ABS(v) ((v) > 0 ? (v) : -(v))
 #endif
 
-static CvScalar s_colors[128];
-static void
-color_tab_init() {
-        int i = 0;
-        int r = 0, g = 0, b = 255;
-        for (; i < 128; ++i) {
-                s_colors[i] = cvScalar((b + i * 10) & 0xFF, (g + i*5) & 0xFF, ABS((r - i * 10) & 0xFF));
-        }
-}
+static CvScalar s_colors[16] = {
+        {255, 255, 255, 0},
+        {255, 0, 255, 0},
+        {255, 255, 0, 0},
+        {0, 255, 255, 0},
+        {0, 0, 255, 0},
+        {255, 0, 0, 0},
+        {0, 255, 0, 0},
+        {50, 50, 255, 0},
+        {255, 50, 255, 0},
+        {20, 255, 80, 0},
+        {100, 100, 255, 0},
+        {90, 255, 0, 0},
+        {33, 99, 15, 0},
+        {200, 90, 0, 0},
+        {99, 0, 200, 0},
+        {100, 25, 85, 0},
+};
 
 static CvScalar
 colors_get(int i) {
-        return s_colors[ i & 0x7f];
+        return s_colors[ i & 0x0f ];
 }
 
 static void
@@ -169,16 +179,16 @@ show_result_in_image(const char *imgname, const char *posname, const char *label
         assert(f);
 
         j = ptsvec_size();
-        for (i = 0; i < j; ++j) {
-                if (1 != fscanf(f, "%d", labels[i])) {
+        for (i = 0; i < j; ++i) {
+                if (1 != fscanf(f, "%d", &labels[i])) {
                         assert(0);
                 }
         }
 
-        color_tab_init();
+        cvSetZero(draw);
         // show result
         j = ptsvec_size();
-        for (int i = 0; i < j; ++i) {
+        for (i = 0; i < j; ++i) {
                 cvCircle(draw, s_ptsvec.pts[i], 2, colors_get(labels[i]), 2, CV_AA, 0);
         }
 
@@ -190,6 +200,8 @@ show_result_in_image(const char *imgname, const char *posname, const char *label
         cvDestroyWindow("original");
         cvDestroyWindow("result");
         
+        cvSaveImage("result.bmp", draw, 0);
+
         free(labels);
         fclose(f);
         ptsvec_release();

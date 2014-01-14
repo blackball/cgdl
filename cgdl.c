@@ -14,6 +14,8 @@
 #include <float.h>
 #include <string.h>
 
+#include <assert.h>
+
 #ifndef INLINE
 #  if defined __cplusplus
 #      define INLINE inline
@@ -612,6 +614,9 @@ fastpair_distance(const struct fastpair_t *fp, int ia, int ib) {
         mab = wmat_getm(fp->wm, IVEC_DATAPTR(pa), IVEC_SIZE(pa), IVEC_DATAPTR(pb), IVEC_SIZE(pb));
         mba = wmat_getm(fp->wm, IVEC_DATAPTR(pb), IVEC_SIZE(pb), IVEC_DATAPTR(pa), IVEC_SIZE(pa));
 
+        assert(mab->cols == mba->rows);
+        assert(mab->rows == mba->cols);
+
         for (i = 0; i < mab->cols; ++i) {
                 ab += mat_sum_col(mab, i) * mat_sum_row(mba, i);
         }
@@ -620,7 +625,7 @@ fastpair_distance(const struct fastpair_t *fp, int ia, int ib) {
         ab /= mab->cols * mab->cols;
 
         for (i = 0; i < mba->cols; ++i) {
-                ba += mat_sum_col(mba, i) * mat_sum_row(mba, i);
+                ba += mat_sum_col(mba, i) * mat_sum_row(mab, i);
         }
 
         ba /= mba->cols * mba->cols;

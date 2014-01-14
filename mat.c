@@ -7,6 +7,7 @@
 #include "mat.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 struct mat_t*
 mat_new(int r, int c) {
@@ -42,6 +43,7 @@ double
 mat_sum_col(const struct mat_t *m, int col) {
         double sum = .0;
         int i = 0;
+        assert(col < m->cols);
         for (; i < m->rows; ++i) {
                 sum += m->data[i * m->cols + col];
         }
@@ -53,6 +55,7 @@ double
 mat_sum_row(const struct mat_t *m, int row) {
         double sum = .0;
         int i = 0;
+        assert(row < m->rows);
         for (; i < m->cols; ++i) {
                 sum += m->data[ row * m->cols + i];
         }
