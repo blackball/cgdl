@@ -1,6 +1,6 @@
 /**
  * Here is a tested example of this codes:
- *    https://github.com/blackball/boring/blob/master/sort-by-another.c
+ * https://github.com/blackball/boring/blob/master/sort-by-another.c
  *
  * @blackball
  */

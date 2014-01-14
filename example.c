@@ -19,15 +19,28 @@ _print_labels(const int *labels, int n) {
 }
 
 static void
+save_labels(const char *name, const int *labels, int n) {
+        FILE *f = fopen(name, "w");
+        int i = 0;
+        assert(f);
+
+        for (; i < n; ++i) {
+                fprintf(f, "%d\n", labels[i]);
+        }
+        
+        fclose(f);
+}
+
+static void
 demo(void) {
         /* target cluster number */
         const int T = 4;
         int ret = 0;
 
         int *labels = NULL;
-        struct cgdl *gdl = NULL;
+        struct cgdl_t *gdl = NULL;
 
-        struct mat *m = mat_load("dm-1.txt");
+        struct mat_t *m = mat_load("dm-1.txt");
 
         if (m == NULL) {
                 /* load distance mat failed! */
@@ -52,7 +65,7 @@ demo(void) {
                 printf("The affinity of merged clusters is: %lf\n", aff);
         }
 
-        labels = malloc(sizeof(labels[0]) * m->cols);
+        labels = malloc(sizeof(labels[0]) * m->rows);
 
         if (labels == NULL) {
                 goto _DOOR;
@@ -61,6 +74,7 @@ demo(void) {
         /* get the class labels */
         cgdl_labels(gdl, labels);
 
+        save_labels("labels.txt", labels, m->rows);
         /* Then you get the labels, do whatever you what next  */
         _print_labels(labels, m->cols);
 
@@ -78,10 +92,20 @@ demo(void) {
         }
 }
 
+
+#if defined(USE_IMAGE)
+#include "utils.h"
+#endif
+
 int
 main(int argc, char *argv[]) {
+#if defined(USE_IMAGE)
+        extract_dm("draw.bmp", "dm.txt", "positions.txt");
+#endif
         demo();
-		getchar();
+#if defined(USE_IMAGE)
+        show_result_in_image("draw.bmp", "positions.txt", "labels.txt");
+#endif
         return 0;
 }
 

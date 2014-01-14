@@ -89,55 +89,55 @@
 
 /* merge v1 to v0 */
 #define IVEC_MERGE(v0, v1)                                              \
-                do {                                                    \
-                        const int nsz = IVEC_SIZE(v0) + IVEC_SIZE(v1);  \
-                        IVEC_RESIZE(v0, nsz);                           \
-                        if (v0 != NULL) {                               \
-                                memcpy( IVEC_DATAPTR(v0) + IVEC_SIZE(v0), IVEC_DATAPTR(v1), sizeof(Itype) * IVEC_SIZE(v1)); \
-                                IVEC_SIZE(v0) += IVEC_SIZE(v1);         \
-                        }                                               \
-                } while (0)
+        do {                                                            \
+                const int nsz = IVEC_SIZE(v0) + IVEC_SIZE(v1);          \
+                IVEC_RESIZE(v0, nsz);                                   \
+                if (v0 != NULL) {                                       \
+                        memcpy( IVEC_DATAPTR(v0) + IVEC_SIZE(v0), IVEC_DATAPTR(v1), sizeof(Itype) * IVEC_SIZE(v1)); \
+                        IVEC_SIZE(v0) += IVEC_SIZE(v1);                 \
+                }                                                       \
+        } while (0)
 
 
 /* make ivec could be used as a set */
 
-#define IVEC_FIND(v, val, re)                                   \
-                do {                                            \
-                        int i = 0;                              \
-                        re = -1;                                \
-                        for (; i < IVEC_SIZE(v); ++i) {         \
-                                if (IVEC_AT(v, i) == val) {     \
-                                        re = i;                 \
-                                        break;                  \
-                                }                               \
-                        }                                       \
-                } while (0)
-
-
-#define IVEC_INSERT(v, val)                             \
-                do {                                    \
-                        int re = -1;                    \
-                        IVEC_FIND(v, val, re);          \
-                        if (re == -1) {                 \
-                                IVEC_APPEND(v, val);    \
+#define IVEC_FIND(v, val, re)                           \
+        do {                                            \
+                int i = 0;                              \
+                re = -1;                                \
+                for (; i < IVEC_SIZE(v); ++i) {         \
+                        if (IVEC_AT(v, i) == val) {     \
+                                re = i;                 \
+                                break;                  \
                         }                               \
-                } while (0)
+                }                                       \
+        } while (0)
 
 
-#define IVEC_MIN(v, re)                                         \
-                do {    /* v's size should be >= 1 */           \
-                        int i = 1;                              \
-                        re = IVEC_AT(v, 0) ;                    \
-                        for (; i < IVEC_SIZE(v); ++i) {         \
-                                if (re > IVEC_AT(v, i)) {       \
-                                        re = IVEC_AT(v, i);     \
-                                }                               \
-                        }                                       \
-                } while (0)
+#define IVEC_INSERT(v, val)                     \
+        do {                                    \
+                int re = -1;                    \
+                IVEC_FIND(v, val, re);          \
+                if (re == -1) {                 \
+                        IVEC_APPEND(v, val);    \
+                }                               \
+        } while (0)
+
+
+#define IVEC_MIN(v, re)                                 \
+        do {    /* v's size should be >= 1 */           \
+                int i = 1;                              \
+                re = IVEC_AT(v, 0) ;                    \
+                for (; i < IVEC_SIZE(v); ++i) {         \
+                        if (re > IVEC_AT(v, i)) {       \
+                                re = IVEC_AT(v, i);     \
+                        }                               \
+                }                                       \
+        } while (0)
 
 /** idict structure **/
 
-struct idict {
+struct idict_t {
         int size, alloc;
         int vnum;   /* valid, non-null vectors, because we have a merge keep method ... */
         int **pvec; /*  treat pvec[i] as a IVEC */
@@ -146,9 +146,9 @@ struct idict {
 #define IDICT_DEFAULT_SIZE 128
 #define IDICT_DEFAULT_STEP 128
 
-static struct idict*
+static struct idict_t*
 idict_new(int sz) {
-        struct idict *dict = malloc(sizeof(*dict));
+        struct idict_t *dict = malloc(sizeof(*dict));
 
         if (dict == NULL) {
                 return NULL;
@@ -171,7 +171,7 @@ idict_new(int sz) {
 }
 
 static void
-idict_free(struct idict **dict) {
+idict_free(struct idict_t **dict) {
         if (dict && (*dict)) {
                 int i = 0;
                 for (; i < (*dict)->size; ++i) {
@@ -184,7 +184,7 @@ idict_free(struct idict **dict) {
 }
 
 static int
-idict_find(const struct idict *dict, int key) {
+idict_find(const struct idict_t *dict, int key) {
         int i;
 
         if (dict == NULL || dict->size <= 0) {
@@ -202,7 +202,7 @@ idict_find(const struct idict *dict, int key) {
 }
 
 static int
-idict_resize(struct idict *dict, int nsz) {
+idict_resize(struct idict_t *dict, int nsz) {
         if (dict->alloc >= nsz || nsz <= 0) {
                 return 0;
         }
@@ -229,7 +229,7 @@ idict_resize(struct idict *dict, int nsz) {
 }
 
 static void
-idict_add(struct idict *dict, int key, int val) {
+idict_add(struct idict_t *dict, int key, int val) {
         int i = idict_find(dict, key);
 
         if (i == -1) {
@@ -255,7 +255,7 @@ idict_add(struct idict *dict, int key, int val) {
 }
 
 static int
-idict_merge(struct idict *dict, int dstIdx, int srcIdx) {
+idict_merge(struct idict_t *dict, int dstIdx, int srcIdx) {
         int i;
 
         if ( dict == NULL || dict->size <= dstIdx || dict->size <= srcIdx ||
@@ -283,7 +283,7 @@ idict_merge(struct idict *dict, int dstIdx, int srcIdx) {
  * NOTE this won't decrease the number of pvec!!
  */
 static int
-idict_merge_keep(struct idict *dict, int dstIdx, int srcIdx) {
+idict_merge_keep(struct idict_t *dict, int dstIdx, int srcIdx) {
 
         if ( dict == NULL || dict->size <= dstIdx || dict->size <= srcIdx ||
              dict->pvec[dstIdx] == NULL || dict->pvec[srcIdx] == NULL) {
@@ -302,7 +302,7 @@ idict_merge_keep(struct idict *dict, int dstIdx, int srcIdx) {
 }
 
 static void
-idict_print(const struct idict *dict) {
+idict_print(const struct idict_t *dict) {
         int i, j;
         if (dict == NULL) {
                 return ;
@@ -319,14 +319,14 @@ idict_print(const struct idict *dict) {
 }
 
 /** wmat structure **/
-struct wmat {
+struct wmat_t {
         int rows, cols;
         int *i;
         double *w;
 };
 
 static void
-wmat_print(const struct wmat *wm) {
+wmat_print(const struct wmat_t *wm) {
         int i, j;
         if (wm == NULL) {
                 printf("wmat is NULL!\n");
@@ -343,9 +343,9 @@ wmat_print(const struct wmat *wm) {
         return ;
 }
 
-static struct wmat*
+static struct wmat_t*
 wmat_new(int r, int c) {
-        struct wmat *wm = malloc(sizeof(*wm));
+        struct wmat_t *wm = malloc(sizeof(*wm));
         wm->i = malloc(sizeof(int) * r * c);
         wm->w = malloc(sizeof(double) * r * c);
         wm->rows = r;
@@ -354,7 +354,7 @@ wmat_new(int r, int c) {
 }
 
 static void
-wmat_free(struct wmat **wm) {
+wmat_free(struct wmat_t **wm) {
         if (wm && (*wm)) {
                 free( (*wm)->i );
                 free( (*wm)->w );
@@ -364,7 +364,7 @@ wmat_free(struct wmat **wm) {
 }
 
 static void
-wmat_square(struct wmat *wm) {
+wmat_square(struct wmat_t *wm) {
         const int sz = wm->cols * wm->rows;
         double *w = wm->w;
 
@@ -375,7 +375,7 @@ wmat_square(struct wmat *wm) {
 }
 
 double
-wmat_sum(const struct wmat *wm) {
+wmat_sum(const struct wmat_t *wm) {
         const int cols = wm->cols;
         const int rows = wm->rows;
         double *w = wm->w;
@@ -395,7 +395,7 @@ wmat_sum(const struct wmat *wm) {
 #define WMAT_SORT_BY_D 1
 
 static void
-wmat_sort(struct wmat *wm, int flag) {
+wmat_sort(struct wmat_t *wm, int flag) {
         int i;
 
 #define WMAT_CMP(a, b) ((*a) < (*b))
@@ -423,7 +423,7 @@ wmat_sort(struct wmat *wm, int flag) {
 }
 
 static int
-wmat_normalize(struct wmat *wm, int k, double a) {
+wmat_normalize(struct wmat_t *wm, int k, double a) {
         int i;
         double sum = .0, sigma2_inv = .0;
 
@@ -461,7 +461,7 @@ wmat_swap_label(int *labels, int n, int old, int new) {
  * k <= wm->cols
  */
 static int
-wmat_link(const struct wmat *wm, int k, int *labels) {
+wmat_link(const struct wmat_t *wm, int k, int *labels) {
         int i, j, label_gen = 0;
         int *label_set = NULL;
         const int N = wm->rows;
@@ -528,7 +528,7 @@ wmat_link(const struct wmat *wm, int k, int *labels) {
 }
 
 static INLINE int
-_wmat_bsearch(const int *indices, int n, int val) {
+wmat_bsearch(const int *indices, int n, int val) {
         int start = 0, end = n - 1, mid;
 
         while (start <= end) {
@@ -547,10 +547,10 @@ _wmat_bsearch(const int *indices, int n, int val) {
 }
 
 static INLINE double
-wmat_get_d(const struct wmat *wm, int r, int c) {
+wmat_get_d(const struct wmat_t *wm, int r, int c) {
         const int *indices = wm->i + r * wm->cols;
 
-        int re = _wmat_bsearch(indices, wm->cols, c);
+        int re = wmat_bsearch(indices, wm->cols, c);
 
         if (re != -1) {
                 return wm->w[r * wm->cols + re];
@@ -560,10 +560,10 @@ wmat_get_d(const struct wmat *wm, int r, int c) {
 }
 
 /* get a mat from wmat by row indices and col indices */
-static struct mat*
-wmat_getm(const struct wmat *wm, const int *ri, int rn, const int *ci, int cn) {
+static struct mat_t*
+wmat_getm(const struct wmat_t *wm, const int *ri, int rn, const int *ci, int cn) {
         int i, j;
-        struct mat *m = mat_new(rn, cn);
+        struct mat_t *m = mat_new(rn, cn);
 
         if (m == NULL) {
                 return NULL;
@@ -580,7 +580,7 @@ wmat_getm(const struct wmat *wm, const int *ri, int rn, const int *ci, int cn) {
 
 /** fastpair routine implementation **/
 
-struct fastpair {
+struct fastpair_t {
         int npoints;
         int *points;
         int *where;
@@ -588,18 +588,18 @@ struct fastpair {
         double *nbr_dist;
 
         /* external data, used by distance func */
-        const struct idict *dict;
-        const struct wmat  *wm;
+        const struct idict_t *dict;
+        const struct wmat_t  *wm;
 };
 
 #define MAX_DISTANCE DBL_MAX
 
 /* cluster affinity */
 static INLINE double
-fastpair_distance(const struct fastpair *fp, int ia, int ib) {
+fastpair_distance(const struct fastpair_t *fp, int ia, int ib) {
         double ab = .0, ba = .0;
 
-        struct mat *mab = NULL, *mba = NULL;
+        struct mat_t *mab = NULL, *mba = NULL;
         const int *pa = NULL, *pb = NULL;
         int i;
 
@@ -634,7 +634,7 @@ fastpair_distance(const struct fastpair *fp, int ia, int ib) {
 }
 
 static void
-fastpair_free(struct fastpair **fp) {
+fastpair_free(struct fastpair_t **fp) {
         if (fp && (*fp)) {
                 free( (*fp)->points );
                 free( (*fp)->where );
@@ -644,10 +644,10 @@ fastpair_free(struct fastpair **fp) {
         }
 }
 
-static struct fastpair*
-fastpair_new(const struct idict *dict, const struct wmat *wm) {
+static struct fastpair_t*
+fastpair_new(const struct idict_t *dict, const struct wmat_t *wm) {
         int np = dict->size, i, *p = NULL;
-        struct fastpair *fp = malloc(sizeof(*fp));
+        struct fastpair_t *fp = malloc(sizeof(*fp));
 
         if (fp == NULL) {
                 return NULL;
@@ -710,7 +710,7 @@ fastpair_new(const struct idict *dict, const struct wmat *wm) {
  * find the NN of a given point
  */
 static INLINE void
-fastpair_findnn(struct fastpair *fp, int p) {
+fastpair_findnn(struct fastpair_t *fp, int p) {
         int i, first_nbr;
 
         if (fp->npoints == 1) {
@@ -741,13 +741,13 @@ fastpair_findnn(struct fastpair *fp, int p) {
 }
 
 static INLINE void
-fastpair_add(struct fastpair *fp, int p) {
+fastpair_add(struct fastpair_t *fp, int p) {
         fastpair_findnn(fp, p);
         fp->points[ fp->where[p] = fp->npoints ++ ] = p;
 }
 
 static INLINE void
-fastpair_update(struct fastpair *fp, int p) {
+fastpair_update(struct fastpair_t *fp, int p) {
         int i;
         fp->neighbors[p] = p;
         fp->nbr_dist[p] = MAX_DISTANCE;
@@ -774,7 +774,7 @@ fastpair_update(struct fastpair *fp, int p) {
 }
 
 static INLINE void
-fastpair_delete(struct fastpair *fp, int p) {
+fastpair_delete(struct fastpair_t *fp, int p) {
         int i, q = fp->where[p];
 
         fp->npoints --;
@@ -794,7 +794,7 @@ fastpair_delete(struct fastpair *fp, int p) {
  * if error happened, return -1, else 0
  */
 int
-fastpair_find(const struct fastpair *fp, int *a, int *b, double *dist) {
+fastpair_find(const struct fastpair_t *fp, int *a, int *b, double *dist) {
         double d;
         int r, i;
 
@@ -823,19 +823,19 @@ fastpair_find(const struct fastpair *fp, int *a, int *b, double *dist) {
 
 /** cgdl API implementation **/
 
-struct cgdl {
+struct cgdl_t {
         int kw;
         int kl;
         double a;
 
-        struct wmat *wm;
-        struct idict *dict;
-        struct fastpair *fp;
+        struct wmat_t *wm;
+        struct idict_t *dict;
+        struct fastpair_t *fp;
 };
 
 
 static INLINE void
-_cgdl_heaptify(int *indices, double *values, int k) {
+cgdl_heaptify(int *indices, double *values, int k) {
         int i, maxi = 0;
         double maxv = values[0];
 
@@ -847,10 +847,11 @@ _cgdl_heaptify(int *indices, double *values, int k) {
         }
 
 #define _SWAP(arr, ia, ib, t) t = arr[ia]; arr[ia] = arr[ib]; arr[ib] = t
-
         /* swap 0<->maxi */
         _SWAP(indices, 0, maxi, i);
         _SWAP(values, 0, maxi, maxv);
+        
+#undef _SWAP
 }
 
 static void
@@ -864,7 +865,7 @@ _iv_print(const int *indices, const double *values, int k) {
 
 /* exclude itself */
 static INLINE void
-_cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *values, int k) {
+cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *values, int k) {
         int i = 0;
 
         for (; i < k; ++i) {
@@ -876,13 +877,13 @@ _cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *
                 indices[exclude] = k;
                 values[exclude] = data[k];
 
-                _cgdl_heaptify(indices, values, k);
+                cgdl_heaptify(indices, values, k);
 
                 for (i = k+1; i < sz; ++i) {
                         if ( data[i] < values[0]) {
                                 values[0] = data[i];
                                 indices[0] = i;
-                                _cgdl_heaptify(indices, values, k);
+                                cgdl_heaptify(indices, values, k);
                         }
                 }
         }
@@ -895,7 +896,7 @@ _cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *
                         if ( data[i] < values[0]) {
                                 values[0] = data[i];
                                 indices[0] = i;
-                                _cgdl_heaptify(indices, values, k);
+                                cgdl_heaptify(indices, values, k);
                         }
                 }
 
@@ -905,9 +906,9 @@ _cgdl_smallest_k(int exclude, const double *data, int sz, int *indices, double *
 /* construct KNN matrix from distance mat
  * using simplified min-heap.
  */
-static struct wmat*
-_cgdl_knn(const struct mat *dm, int k) {
-        struct wmat *wm = NULL;
+static struct wmat_t*
+cgdl_knn(const struct mat_t *dm, int k) {
+        struct wmat_t *wm = NULL;
         int i;
 
         if (dm == 0 || (k <= 0 || k > dm->rows)) {
@@ -921,7 +922,7 @@ _cgdl_knn(const struct mat *dm, int k) {
         }
 
         for (i = 0; i < dm->rows; ++i) {
-                _cgdl_smallest_k(i, dm->data + i*dm->cols, dm->cols, wm->i + i*k, wm->w + i*k, k);
+                cgdl_smallest_k(i, dm->data + i*dm->cols, dm->cols, wm->i + i*k, wm->w + i*k, k);
         }
 
         return wm;
@@ -929,9 +930,9 @@ _cgdl_knn(const struct mat *dm, int k) {
 
 /* Just one link operation.
  */
-static struct idict*
-_cgdl_link(const struct wmat *wm, int k) {
-        struct idict *dict = NULL;
+static struct idict_t*
+cgdl_link(const struct wmat_t *wm, int k) {
+        struct idict_t *dict = NULL;
         int i, err = 0;
         int *labels = NULL;
 
@@ -967,9 +968,9 @@ _cgdl_link(const struct wmat *wm, int k) {
         return dict;
 }
 
-struct cgdl*
+struct cgdl_t*
 cgdl_new(int kw, int kl) {
-        struct cgdl *gdl = malloc(sizeof(*gdl));
+        struct cgdl_t *gdl = malloc(sizeof(*gdl));
 
         if (gdl != NULL) {
                 /* default values for GDL */
@@ -990,9 +991,9 @@ cgdl_new(int kw, int kl) {
 }
 
 void
-cgdl_free(struct cgdl **gdl) {
+cgdl_free(struct cgdl_t **gdl) {
         if (gdl && (*gdl)) {
-                struct cgdl *t = *gdl;
+                struct cgdl_t *t = *gdl;
 
                 if (t->dict) {
                         idict_free(&(t->dict));
@@ -1013,12 +1014,12 @@ cgdl_free(struct cgdl **gdl) {
 }
 
 int
-cgdl_init(struct cgdl *gdl, const struct mat *dm) {
-        struct wmat *wm = NULL;
-        struct idict *dict = NULL;
-        struct fastpair *fp = NULL;
+cgdl_init(struct cgdl_t *gdl, const struct mat_t *dm) {
+        struct wmat_t *wm = NULL;
+        struct idict_t *dict = NULL;
+        struct fastpair_t *fp = NULL;
 
-        wm = _cgdl_knn(dm, gdl->kw);
+        wm = cgdl_knn(dm, gdl->kw);
 
         if (wm == NULL) {
                 goto _DOOR;
@@ -1026,7 +1027,7 @@ cgdl_init(struct cgdl *gdl, const struct mat *dm) {
 
         wmat_sort(wm, WMAT_SORT_BY_D);
 
-        dict = _cgdl_link(wm, gdl->kl);
+        dict = cgdl_link(wm, gdl->kl);
 
         if (dict == NULL) {
                 goto _DOOR;
@@ -1064,7 +1065,7 @@ cgdl_init(struct cgdl *gdl, const struct mat *dm) {
 }
 
 int
-cgdl_num(const struct cgdl *gdl) {
+cgdl_num(const struct cgdl_t *gdl) {
         if (gdl == NULL || gdl->dict == NULL) {
                 return -1;
         }
@@ -1072,7 +1073,7 @@ cgdl_num(const struct cgdl *gdl) {
 }
 
 double
-cgdl_merge(struct cgdl *gdl) {
+cgdl_merge(struct cgdl_t *gdl) {
         double aff = .0;
 
         int a, b, err = 0;
@@ -1100,9 +1101,9 @@ cgdl_merge(struct cgdl *gdl) {
 }
 
 int
-cgdl_labels(const struct cgdl *gdl, int *labels) {
+cgdl_labels(const struct cgdl_t *gdl, int *labels) {
         int i, j, label;
-        const struct idict *dict = gdl->dict;
+        const struct idict_t *dict = gdl->dict;
 
         for (i = 0; i < gdl->wm->rows; ++i) {
                 labels[i] = -1;
