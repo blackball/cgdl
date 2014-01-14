@@ -9,6 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined (NO_PUTS)
+#define PUTS(s)
+#else
+#define PUTS(s) PUTS(s)
+#endif
+
 static void
 _print_labels(const int *labels, int n) {
         int i = 0;
@@ -38,8 +44,11 @@ demo(const char *dmname, const char *labelname) {
 
         int *labels = NULL;
         struct cgdl_t *gdl = NULL;
-
-        struct mat_t *m = mat_load(dmname);
+        
+        struct mat_t *m = 0;
+        
+        PUTS("Loading distance matrix...");
+        m = mat_load(dmname);
 
         if (m == NULL) {
                 /* load distance mat failed! */
@@ -53,26 +62,31 @@ demo(const char *dmname, const char *labelname) {
         }
 
         /* get weight matrix and initial clusters */
+        PUTS("Initializing GDL...");
         ret = cgdl_init(gdl, m);
 
         if (ret != 0) {
                 goto _DOOR;
         }
 
+        PUTS("Clustering...");
         while ( cgdl_num(gdl) > T ) {
                 double aff = cgdl_merge(gdl);
                 printf("The affinity of merged clusters is: %lf, %d\n", aff, cgdl_num(gdl));
         }
 
+        PUTS("Finished!");
+        
         labels = malloc(sizeof(labels[0]) * m->rows);
 
         if (labels == NULL) {
                 goto _DOOR;
         }
-
+        
         /* get the class labels */
         cgdl_labels(gdl, labels);
 
+        PUTS("Save labels...");
         save_labels(labelname, labels, m->rows);
         /* Then you get the labels, do whatever you what next  */
         //_print_labels(labels, m->cols);
@@ -91,6 +105,16 @@ demo(const char *dmname, const char *labelname) {
         }
 }
 
+/* I simply draw some clusters in a black background image
+ * and use the foreground coordinates (x, y) as features, using
+ * Euclidean distance to calculate the distance matrix. Then perform
+ * *GDL* on the distance matrix. Then draw the clusters in different
+ * colors in a same size image.
+ *
+ * @NOTE If you may need tune the *GDL* paramemters in the demo() function
+ * to get a good results. 
+ */
+
 #define USE_IMAGE
 
 #if defined(USE_IMAGE)
@@ -99,13 +123,19 @@ demo(const char *dmname, const char *labelname) {
 
 int
 main(int argc, char *argv[]) {
+        const char *imgname = "./data/draw.bmp";
+        const char *dmname = "./data/dm.txt";
+        const char *posname = "./data/positions.txt";
+        const char *lname = "./data/labels.txt";
+        
 #if defined(USE_IMAGE)
-        extract_dm("draw4.bmp", "dm.txt", "positions.txt");
+        PUTS("Prepareing the distance matrix...");
+        extract_dm(imgname, dmname, posname);
 #endif
-        demo("dm.txt", "labels.txt");
+        demo(dmname, lname);
+        
 #if defined(USE_IMAGE)
-        show_result_in_image("draw4.bmp", "positions.txt", "labels.txt");
+        show_result_in_image(imgname, posname, lname);
 #endif
         return 0;
 }
-
