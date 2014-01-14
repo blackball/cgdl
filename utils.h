@@ -200,7 +200,7 @@ show_result_in_image(const char *imgname, const char *posname, const char *label
         cvDestroyWindow("original");
         cvDestroyWindow("result");
         
-        cvSaveImage("result.bmp", draw, 0);
+        cvSaveImage("./data/result.bmp", draw, 0);
 
         free(labels);
         fclose(f);

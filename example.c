@@ -12,7 +12,7 @@
 #if defined (NO_PUTS)
 #define PUTS(s)
 #else
-#define PUTS(s) PUTS(s)
+#define PUTS(s) puts(s)
 #endif
 
 static void
@@ -123,7 +123,7 @@ demo(const char *dmname, const char *labelname) {
 
 int
 main(int argc, char *argv[]) {
-        const char *imgname = "./data/draw.bmp";
+        const char *imgname = "./data/clusters.bmp";
         const char *dmname = "./data/dm.txt";
         const char *posname = "./data/positions.txt";
         const char *lname = "./data/labels.txt";
