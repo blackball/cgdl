@@ -11,10 +11,11 @@ simply grouped the pixels in the first picture using *GDL*, the second
 picture is the output. The codes was tested on Win7 using VS2010, and   
 it should work in Linux system too.   
   
-You need install the OpenCV (1.0+) library to run *example.c*.  
+You need install the OpenCV (1.0+) library to compile *example.c*.  
   
 The author also open sourced his Matlab implementation in :  
     https://github.com/waynezhanghk/gactoolbox  
   
-[0]: Graph Degree Linkage: Agglomerative Clustering on a Directed Graph,   
-     Wei Zhang. ECCV 2012.  
+
+   
+[0]: Graph Degree Linkage: Agglomerative Clustering on a Directed Graph, Wei Zhang. ECCV 2012.  
