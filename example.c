@@ -106,12 +106,12 @@ demo(const char *dmname, const char *labelname) {
 }
 
 /* I simply draw some clusters in a black background image
- * and use the foreground coordinates (x, y) as features, using
+ * and use the foreground coordinates (x, y) as features. And use
  * Euclidean distance to calculate the distance matrix. Then perform
- * *GDL* on the distance matrix. Then draw the clusters in different
+ * *GDL* on the distance matrix, and draw the clusters using different
  * colors in a same size image.
  *
- * @NOTE If you may need tune the *GDL* paramemters in the demo() function
+ * @NOTE You may need to tune the *GDL* paramemters in the demo(...) function
  * to get a good results. 
  */
 
